@@ -1,0 +1,44 @@
+version: '3.4'
+
+services:
+
+  errorit.api:
+    image: ${DOCKER_REGISTRY-}erroritapi
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+    build:
+      context: .
+      dockerfile: ErrorIt.Api/Dockerfile
+    depends_on:
+      - db
+      - redis
+    networks:
+      - backend
+
+  db:
+    image: "mcr.microsoft.com/mssql/server"
+    container_name: db
+    ports:
+      - "1433:1433"
+    environment:
+      SA_PASSWORD: "password123!"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"
+    volumes:
+      - C:\Projects\dockerstorage\sqlserver:/var/opt/mssql/data
+    networks:
+      - backend
+    restart: always
+    
+
+  redis:
+    container_name: redis
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+
+networks:
+  backend:
