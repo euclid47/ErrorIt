@@ -16,7 +16,7 @@ namespace ErrorIt.Api.Migrations
                     CreatedOn = table.Column<DateTime>(nullable: false),
                     UpdatedOn = table.Column<DateTime>(nullable: false),
                     Active = table.Column<bool>(nullable: false),
-                    Name = table.Column<string>(maxLength: 255, nullable: true),
+                    Name = table.Column<string>(maxLength: 50, nullable: true),
                     Description = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -33,16 +33,16 @@ namespace ErrorIt.Api.Migrations
                     CreatedOn = table.Column<DateTime>(nullable: false),
                     UpdatedOn = table.Column<DateTime>(nullable: false),
                     Active = table.Column<bool>(nullable: false),
-                    GroupId = table.Column<int>(nullable: false),
-                    Name = table.Column<string>(maxLength: 255, nullable: true),
+                    ApplicationGroupId = table.Column<int>(nullable: false),
+                    Name = table.Column<string>(maxLength: 50, nullable: true),
                     Description = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Applications", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Applications_ApplicationGroups_GroupId",
-                        column: x => x.GroupId,
+                        name: "FK_Applications_ApplicationGroups_ApplicationGroupId",
+                        column: x => x.ApplicationGroupId,
                         principalTable: "ApplicationGroups",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -58,7 +58,7 @@ namespace ErrorIt.Api.Migrations
                     UpdatedOn = table.Column<DateTime>(nullable: false),
                     Active = table.Column<bool>(nullable: false),
                     ApplicationId = table.Column<int>(nullable: false),
-                    HttpStatusCode = table.Column<int>(nullable: false),
+                    ApplicationErrorCode = table.Column<string>(maxLength: 50, nullable: true),
                     ErrorDetail = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -80,14 +80,11 @@ namespace ErrorIt.Api.Migrations
                 filter: "[Name] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Applications_GroupId",
+                name: "IX_Applications_ApplicationGroupId_Name",
                 table: "Applications",
-                column: "GroupId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Applications_Name",
-                table: "Applications",
-                column: "Name");
+                columns: new[] { "ApplicationGroupId", "Name" },
+                unique: true,
+                filter: "[Name] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ErrorTemplates_ApplicationId",
@@ -95,10 +92,11 @@ namespace ErrorIt.Api.Migrations
                 column: "ApplicationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ErrorTemplates_HttpStatusCode",
+                name: "IX_ErrorTemplates_ApplicationErrorCode_ApplicationId",
                 table: "ErrorTemplates",
-                column: "HttpStatusCode",
-                unique: true);
+                columns: new[] { "ApplicationErrorCode", "ApplicationId" },
+                unique: true,
+                filter: "[ApplicationErrorCode] IS NOT NULL");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

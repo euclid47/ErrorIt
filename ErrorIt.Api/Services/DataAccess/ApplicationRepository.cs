@@ -36,7 +36,7 @@ namespace ErrorIt.Api.Services.DataAccess
 			}
 		}
 
-		public async Task<Application> GetById(int id)
+		public async Task<Application> Get(int applicationGroupId, int id)
 		{
 			try
 			{
@@ -51,7 +51,7 @@ namespace ErrorIt.Api.Services.DataAccess
 			}
 		}
 
-		public async Task<Application> Get(string name)
+		public async Task<Application> Get(int applicationGroupId, string name)
 		{
 			try
 			{
@@ -116,6 +116,21 @@ namespace ErrorIt.Api.Services.DataAccess
 				await _dbContext.SaveChangesAsync();
 
 				return true;
+			}
+			catch (Exception e)
+			{
+				_logger.LogError($"[{System.Reflection.MethodBase.GetCurrentMethod().Name}] {e.Message ?? ""}", e);
+				throw;
+			}
+		}
+
+		public async Task<bool> Exists(int applicationGroupId, int id)
+		{
+			try
+			{
+				var application = await Get(applicationGroupId, id);
+
+				return application != null;
 			}
 			catch (Exception e)
 			{

@@ -7,7 +7,7 @@ namespace ErrorIt.Api.Data.Models
 	public class Application : BaseEntity
 	{
 		public int ApplicationGroupId { get; set; }
-		[MaxLength(255)]
+		[MaxLength(50)]
 		public string Name { get; set; }
 		public string Description { get; set; }
 

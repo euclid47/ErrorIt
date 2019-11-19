@@ -12,5 +12,7 @@ namespace ErrorIt.Api.Interfaces
 		Task<ApplicationGroup> Get(int id);
 		Task<ApplicationGroup> Get(string name);
 		Task<ApplicationGroup> Update(int id, string name, string description);
+		Task<bool> Exists(int id);
+		Task<bool> Exists(string name);
 	}
 }

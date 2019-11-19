@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ErrorIt.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20191118045911_updatedDefinitions")]
-    partial class updatedDefinitions
+    [Migration("20191119041619_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -41,17 +41,17 @@ namespace ErrorIt.Api.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(255)")
-                        .HasMaxLength(255);
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
 
                     b.Property<DateTime>("UpdatedOn")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationGroupId");
-
-                    b.HasIndex("Name");
+                    b.HasIndex("ApplicationGroupId", "Name")
+                        .IsUnique()
+                        .HasFilter("[Name] IS NOT NULL");
 
                     b.ToTable("Applications");
                 });
@@ -73,8 +73,8 @@ namespace ErrorIt.Api.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(255)")
-                        .HasMaxLength(255);
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
 
                     b.Property<DateTime>("UpdatedOn")
                         .HasColumnType("datetime2");
@@ -99,7 +99,8 @@ namespace ErrorIt.Api.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("ApplicationErrorCode")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
 
                     b.Property<int>("ApplicationId")
                         .HasColumnType("int");

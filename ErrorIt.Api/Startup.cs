@@ -12,6 +12,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using System;
+using System.Linq;
 
 namespace ErrorIt.Api
 {
@@ -107,11 +108,14 @@ namespace ErrorIt.Api
 
 					try
 					{
-						context.Database.Migrate();
-					}
-					catch(Exception)
-					{
+						var pendingMigrations = context.Database.GetPendingMigrations();
 
+						if(pendingMigrations.Any())
+							context.Database.Migrate();
+					}
+					catch(Exception e)
+					{
+						Console.WriteLine(e.Message ?? "");
 					}
 				}
 			}

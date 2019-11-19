@@ -26,7 +26,11 @@ namespace ErrorIt.Api.Services.DataAccess
 		{
 			try
 			{
-				return await _dbContext.ApplicationGroups.AsNoTracking().ToListAsync();
+				var result = await _dbContext.ApplicationGroups.AsNoTracking().ToListAsync();
+
+				SetCache(result);				
+
+				return result;
 			}
 			catch (Exception e)
 			{
@@ -39,7 +43,17 @@ namespace ErrorIt.Api.Services.DataAccess
 		{
 			try
 			{
-				return await _dbContext.ApplicationGroups.AsNoTracking().SingleOrDefaultAsync(x => x.Id == id);
+				ApplicationGroup result = await GetCache(id);
+				
+				if(result is null)
+				{
+					result = await _dbContext.ApplicationGroups.AsNoTracking().SingleOrDefaultAsync(x => x.Id == id);
+
+					if(result != null)
+						SetCache(result);
+				}
+
+				return result;
 			}
 			catch (Exception e)
 			{
@@ -52,6 +66,7 @@ namespace ErrorIt.Api.Services.DataAccess
 		{
 			try
 			{
+
 				return await _dbContext.ApplicationGroups.AsNoTracking().SingleOrDefaultAsync(x => x.Name == name);
 			}
 			catch (Exception e)
@@ -126,26 +141,87 @@ namespace ErrorIt.Api.Services.DataAccess
 			}
 		}
 
-		private async Task<ApplicationGroup> GetCache(int key)
+		public async Task<bool> Exists(int id)
 		{
-			return await _cacher.Get<ApplicationGroup>($"ApplicationGroup:{key}");
+			try
+			{
+				var group = await Get(id);
+
+				return group != null;
+			}
+			catch (Exception e)
+			{
+				_logger.LogError($"[{System.Reflection.MethodBase.GetCurrentMethod().Name}] {e.Message ?? ""}", e);
+				throw;
+			}
 		}
 
-		private async Task<ApplicationGroup> GetCache(string key)
+		public Task<bool> Exists(string name)
 		{
-			return await _cacher.Get<ApplicationGroup>($"ApplicationGroup:{key}");
+			throw new NotImplementedException();
+		}
+
+		private async Task<ApplicationGroup> GetCache(int key)
+		{
+			try
+			{
+				return await _cacher.Get<ApplicationGroup>($"ApplicationGroup:{key}");
+			}
+			catch (Exception e)
+			{
+				_logger.LogError($"[{System.Reflection.MethodBase.GetCurrentMethod().Name}] {e.Message ?? ""}", e);
+				return null;
+			}		
+		}
+
+		private void SetCache(IEnumerable<ApplicationGroup> applicationGroups)
+		{
+			Task.Factory.StartNew(() =>
+			{
+				try
+				{
+					Task.Factory.StartNew(() => {
+						foreach (var group in applicationGroups)
+						{
+							SetCache(group);
+						}
+					});
+				}
+				catch (Exception e)
+				{
+					_logger.LogError($"[{System.Reflection.MethodBase.GetCurrentMethod().Name}] {e.Message ?? ""}", e);
+				}
+			});
 		}
 
 		private void SetCache(ApplicationGroup applicationGroup)
 		{
-			_cacher.Set($"ApplicationGroup:{applicationGroup.Id}", applicationGroup, TimeSpan.FromMinutes(DotNetEnv.Env.GetInt("cachetimeout", 10)));
-			_cacher.Set($"ApplicationGroup:{applicationGroup.Name}", applicationGroup, TimeSpan.FromMinutes(DotNetEnv.Env.GetInt("cachetimeout", 10)));
+			Task.Factory.StartNew(() => 
+			{
+				try
+				{
+					_cacher.Set($"ApplicationGroup:{applicationGroup.Id}", applicationGroup, TimeSpan.FromMinutes(DotNetEnv.Env.GetInt("cachetimeout", 10)));
+				}
+				catch (Exception e)
+				{
+					_logger.LogError($"[{System.Reflection.MethodBase.GetCurrentMethod().Name}] {e.Message ?? ""}", e);
+				}
+			});			
 		}
 
 		private void RemoveCache(ApplicationGroup applicationGroup)
 		{
-			_cacher.Remove($"ApplicationGroup:{applicationGroup.Id}");
-			_cacher.Remove($"ApplicationGroup:{applicationGroup.Name}");
+			Task.Factory.StartNew(() =>
+			{
+				try
+				{
+					_cacher.Remove($"ApplicationGroup:{applicationGroup.Id}");
+				}
+				catch (Exception e)
+				{
+					_logger.LogError($"[{System.Reflection.MethodBase.GetCurrentMethod().Name}] {e.Message ?? ""}", e);
+				}
+			});
 		}
 	}
 }

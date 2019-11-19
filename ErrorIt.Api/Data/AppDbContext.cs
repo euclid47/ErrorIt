@@ -18,7 +18,7 @@ namespace ErrorIt.Data
 			
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
-			builder.Entity<Application>().HasIndex(x => x.Name).IsUnique(false);
+			builder.Entity<Application>().HasIndex(x => new { x.ApplicationGroupId, x.Name }).IsUnique();
 			builder.Entity<ApplicationGroup>().HasIndex(x => x.Name).IsUnique();
 			builder.Entity<ErrorTemplate>().HasIndex(x => new { x.ApplicationErrorCode , x.ApplicationId }).IsUnique();
 		}

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using ErrorIt.Api.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +18,7 @@ namespace ErrorIt.Api.Controllers
 		}
 
 		[HttpGet]
-		[Route("/ApplicationGroup")]
+		[Route("/Group")]
 		public async Task<IActionResult> Get()
 		{
 			try
@@ -34,17 +32,15 @@ namespace ErrorIt.Api.Controllers
 		}
 
 		[HttpGet]
-		[Route("/ApplicationGroup/{id}")]
+		[Route("/Group/{id}")]
 		public async Task<IActionResult> Get(int id)
 		{
 			try
 			{
-				var result = await _groupRepository.Get(id);
-
-				if (result is null)
+				if (!await _groupRepository.Exists(id))
 					return NotFound();
 
-				return Json(result);
+				return Json(await _groupRepository.Get(id));
 			}
 			catch (Exception e)
 			{
@@ -53,7 +49,7 @@ namespace ErrorIt.Api.Controllers
 		}
 
 		[HttpPost]
-		[Route("/ApplicationGroup/Create")]
+		[Route("/Group/Create")]
 		public async Task<IActionResult> Create(string name, string description)
 		{
 			try
@@ -67,7 +63,7 @@ namespace ErrorIt.Api.Controllers
 		}
 
 		[HttpPost]
-		[Route("/ApplicationGroup/{id}/Update")]
+		[Route("/Group/{id}/Update")]
 		public async Task<IActionResult> Update(int id, string name, string description)
 		{
 			try

@@ -38,6 +38,19 @@ namespace ErrorIt.Api.Services.DataAccess
 			}
 		}
 
+		public async Task<ErrorTemplate> Get(int applicationId, int id)
+		{
+			try
+			{
+				return await _dbContext.ErrorTemplates.AsNoTracking().SingleOrDefaultAsync(x => x.ApplicationId == applicationId && x.Id == id);
+			}
+			catch (Exception e)
+			{
+				_logger.LogError($"[{System.Reflection.MethodBase.GetCurrentMethod().Name}] {e.Message ?? ""}", e);
+				throw;
+			}
+		}
+
 		public async Task<ErrorTemplate> Get(int applicationId, string applicationErrorCode)
 		{
 			try
@@ -51,22 +64,7 @@ namespace ErrorIt.Api.Services.DataAccess
 			}
 		}
 
-		public async Task<ErrorTemplate> GetById(int id)
-		{
-			try
-			{
-				//var result = await GetCache(id);
-
-				return await _dbContext.ErrorTemplates.AsNoTracking().SingleOrDefaultAsync(x => x.Id == id);
-			}
-			catch (Exception e)
-			{
-				_logger.LogError($"[{System.Reflection.MethodBase.GetCurrentMethod().Name}] {e.Message ?? ""}", e);
-				throw;
-			}
-		}
-
-		public async Task<ErrorTemplate> Create(int applicationId, ErrorResponse errorResponse)
+		public async Task<ErrorTemplate> Create(int applicationId, IErrorRestBase errorResponse)
 		{
 			try
 			{
@@ -84,7 +82,7 @@ namespace ErrorIt.Api.Services.DataAccess
 			}
 		}
 
-		public async Task<ErrorTemplate> Update(int applicationId, int id, ErrorResponse errorResponse)
+		public async Task<ErrorTemplate> Update(int applicationId, int id, IErrorRestBase errorResponse)
 		{
 			try
 			{
@@ -118,6 +116,22 @@ namespace ErrorIt.Api.Services.DataAccess
 				await _dbContext.SaveChangesAsync();
 
 				return true;
+			}
+			catch (Exception e)
+			{
+				_logger.LogError($"[{System.Reflection.MethodBase.GetCurrentMethod().Name}] {e.Message ?? ""}", e);
+				throw;
+			}
+		}
+
+		public async Task<bool> Exists(int applicationId, int id)
+		{
+
+			try
+			{
+				var errorTemplate = await Get(applicationId, id);
+
+				return errorTemplate != null;
 			}
 			catch (Exception e)
 			{
